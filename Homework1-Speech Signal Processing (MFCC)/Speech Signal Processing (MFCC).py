@@ -12,11 +12,10 @@ import matplotlib.pylab as plt
 from scipy.fftpack import dct
 
 # import and show signal 导入
-sample_rate, signal = scipy.io.wavfile.read('OSR_us_000_0010_8k.wav')  # File assumed to be in the same directory
+sample_rate, signal = scipy.io.wavfile.read('OSR_us_000_0010_8k.wav')
 print("sample rate : " + str(sample_rate))
 signal = signal[int(5 * sample_rate):int(9 * sample_rate)]  # 截取中间段声音
-c1 = dct(signal, type=2, axis=-1, norm='ortho')
-plt.plot(c1)
+plt.plot(signal)
 plt.title('import and show signal', fontsize=12, color='black')
 plt.savefig(f'./out/output1_import and show signal.png')
 plt.show()
@@ -25,8 +24,7 @@ plt.show()
 pre_emphasis = 0.97
 # 这个步骤在群里有讨论过 那么按照网上的来做的话将0位置保留 其余进行预处理
 emphasized_signal = np.append(signal[0], signal[1:] - pre_emphasis * signal[:-1])
-c2 = dct(emphasized_signal, type=2, axis=-1, norm='ortho')
-plt.plot(c2)
+plt.plot(emphasized_signal)
 plt.title('Pre-Emphasis', fontsize=12, color='black')
 plt.savefig(f'./out/output2_Pre-Emphasis.png')
 plt.show()
@@ -45,8 +43,7 @@ indices = np.tile(np.arange(0, frame_length), (num_frames, 1)) + np.tile(
     np.arange(0, num_frames * frame_step, frame_step), (frame_length, 1)).T
 frames = pad_signal[indices.astype(np.int32, copy=False)]
 
-c3 = dct(frames, type=2, axis=-1, norm='ortho')
-plt.plot(c3)
+plt.plot(frames)
 plt.title('Frames', fontsize=12, color='black')
 plt.savefig(f'./out/output3_Frames.png')
 plt.show()
@@ -54,8 +51,7 @@ plt.show()
 # Windowing 加窗
 # Hamming Window
 frames *= np.hamming(frame_length)
-c4 = dct(frames, type=2, axis=-1, norm='ortho')
-plt.plot(c4)
+plt.plot(frames)
 plt.title('Windowing', fontsize=12, color='black')
 plt.savefig(f'./out/output4_Windowing.png')
 plt.show()
@@ -64,8 +60,7 @@ plt.show()
 NFFT = 512
 mag_frames = np.absolute(np.fft.rfft(frames, NFFT))  # Magnitude of the FFT
 pow_frames = ((1.0 / NFFT) * ((mag_frames) ** 2))  # Power Spectrum
-c5 = dct(pow_frames, type=2, axis=-1, norm='ortho')
-plt.plot(c5)
+plt.plot(pow_frames)
 plt.title('DFT', fontsize=12, color='black')
 plt.savefig(f'./out/output5_DFT.png')
 plt.show()
@@ -89,13 +84,13 @@ for m in range(1, nfilt + 1):
     for k in range(f_m, f_m_plus):
         fbank[m - 1, k] = (bin[m + 1] - k) / (bin[m + 1] - bin[m])
 filter_banks = np.dot(pow_frames, fbank.T)
-filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)  # Numerical Stability
-filter_banks = 20 * np.log10(filter_banks)  # dB
+filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)
+filter_banks = 20 * np.log10(filter_banks)
 
 # Final Show
 num_ceps = 12
-c11 = dct(filter_banks, type=2, axis=-1, norm='ortho')[1: (num_ceps + 1)]  # Keep 2-13
-plt.plot(c11)
+c1 = dct(filter_banks, type=2, axis=-1, norm='ortho')[1: (num_ceps + 1)]
+plt.plot(c1)
 plt.title('final1', fontsize=12, color='black')
 plt.savefig(f'./out/output6_final1.png')
 plt.show()
